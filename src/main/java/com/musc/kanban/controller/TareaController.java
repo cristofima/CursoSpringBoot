@@ -1,12 +1,10 @@
 package com.musc.kanban.controller;
 
-import java.util.List;
-import java.util.Optional;
-
 import javax.validation.Valid;
-import javax.xml.ws.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.musc.kanban.exception.ResourceCantBeModificateException;
+import com.musc.kanban.exception.ResourceNotFoundException;
 import com.musc.kanban.model.Tarea;
 import com.musc.kanban.repository.TareaRepository;
 
@@ -28,13 +28,14 @@ public class TareaController {
 	private TareaRepository tareaRepository;
 
 	@GetMapping
-	public List<Tarea> getList() {
-		return this.tareaRepository.findAll();
+	public Page<Tarea> getList(Pageable pageable) {
+		return this.tareaRepository.findAll(pageable);
 	}
 
 	@GetMapping("/{id}")
-	public Optional<Tarea> getById(@PathVariable int id) {
-		return this.tareaRepository.findById(id);
+	public Tarea getById(@PathVariable int id) {
+		return this.tareaRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Tarea con ID " + id + " no fue encontrada"));
 	}
 
 	@PostMapping
@@ -43,21 +44,26 @@ public class TareaController {
 	}
 
 	@PutMapping("/{id}")
-	public Optional<Object> update(@PathVariable int id, @Valid @RequestBody Tarea tarea) {
+	public Tarea update(@PathVariable int id, @Valid @RequestBody Tarea tarea) {
 		return this.tareaRepository.findById(id).map(t -> {
+			if (t.getCompletada()) {
+				throw new ResourceCantBeModificateException(
+						"Tarea con ID " + id + " ya se encuentra completada, y no puede ser modificada");
+			}
+
 			t.setCompletada(tarea.getCompletada());
 			t.setDescripcion(tarea.getDescripcion());
 			t.setNombre(tarea.getNombre());
 			t.setPrioridad(tarea.getPrioridad());
 			return this.tareaRepository.save(t);
-		});
+		}).orElseThrow(() -> new ResourceNotFoundException("Tarea con ID " + id + " no fue encontrada"));
 	}
 
 	@DeleteMapping("/{id}")
-	public Optional<Object> delete(@PathVariable int id) {
+	public ResponseEntity<Object> delete(@PathVariable int id) {
 		return this.tareaRepository.findById(id).map(t -> {
 			this.tareaRepository.delete(t);
 			return ResponseEntity.ok().build();
-		});
+		}).orElseThrow(() -> new ResourceNotFoundException("Tarea con ID " + id + " no fue encontrada"));
 	}
 }
