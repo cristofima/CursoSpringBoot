@@ -20,6 +20,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.musc.kanban.model.audit.DateAudit;
 
 @Entity
@@ -54,6 +55,12 @@ public class User extends DateAudit {
 	/** Default constructor. */
 	public User() {
 		super();
+	}
+
+	public User(String username, String email, String password) {
+		this.username = username;
+		this.email = email;
+		this.password = password;
 	}
 
 	public Set<Rol> getRoles() {
@@ -123,6 +130,7 @@ public class User extends DateAudit {
 	 *
 	 * @return the current value of password
 	 */
+	@JsonIgnore
 	public String getPassword() {
 		return password;
 	}
