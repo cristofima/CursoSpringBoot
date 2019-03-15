@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.musc.kanban.exception.ResourceConflictException;
+import com.musc.kanban.exception.ServerException;
 import com.musc.kanban.model.Rol;
 import com.musc.kanban.model.User;
 import com.musc.kanban.payload.request.SignUpRequest;
@@ -37,11 +39,11 @@ public class AuthController {
 	@PostMapping("/signup")
 	public ResponseEntity<User> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
 		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-
+			throw new ResourceConflictException("Username", signUpRequest.getUsername());
 		}
 
 		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-
+			throw new ResourceConflictException("Email", signUpRequest.getEmail());
 		}
 
 		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
@@ -50,7 +52,7 @@ public class AuthController {
 		Set<Rol> roles = new HashSet<>();
 		Optional<Rol> userRol = rolRepository.findByName("ROLE_USER");
 		if (!userRol.isPresent()) {
-
+			throw new ServerException("Role USER not find.");
 		}
 
 		roles.add(userRol.get());
