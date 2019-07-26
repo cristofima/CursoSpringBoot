@@ -1,0 +1,9 @@
+addons:
+  sonarcloud:
+    organization: "cristofima"
+    token:
+      secure: "travis encrypt 7b300890daf5ab4607ae7e97cc1c258366de2927" # encrypted value of your token
+
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.projectKey=cristofima_CursoSpringBoot
