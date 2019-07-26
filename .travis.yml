@@ -2,7 +2,7 @@ addons:
   sonarcloud:
     organization: "cristofima"
     token:
-      secure: "travis encrypt 7b300890daf5ab4607ae7e97cc1c258366de2927" # encrypted value of your token
+      secure: "b63837b1ff8fef5871ab8fa5ce67d1fb04ce2fe7" # encrypted value of your token
 
 script:
   # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
